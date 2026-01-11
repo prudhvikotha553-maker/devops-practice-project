@@ -14,18 +14,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set Git SHA
-        shell: bash
-        run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        shell: powershell
+        run: |
+          echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $env:GITHUB_ENV
 
       - name: Show SHA
-        run: echo Deploying SHA=$GIT_SHA
+        shell: powershell
+        run: |
+          echo "Deploying SHA=$env:GIT_SHA"
 
       - name: Deploy backend to DEV
+        shell: powershell
         run: |
-          kubectl set image deployment/backend backend=backend-app:$GIT_SHA -n app-dev
-          kubectl rollout status deployment/backend -n app-dev
+          kubectl set image deployment/backend backend=backend-app:$env:GIT_SHA -n app-dev
 
       - name: Deploy frontend to DEV
+        shell: powershell
         run: |
-          kubectl set image deployment/frontend frontend=frontend-app:$GIT_SHA -n app-dev
-          kubectl rollout status deployment/frontend -n app-dev
+          kubectl set image deployment/frontend frontend=frontend-app:$env:GIT_SHA -n app-dev
