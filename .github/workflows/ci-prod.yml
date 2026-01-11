@@ -1,0 +1,28 @@
+name: CI - PROD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ci-prod:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set Git SHA
+        run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Show SHA
+        run: echo "Building PROD images for SHA=$GIT_SHA"
+
+      - name: Build backend image
+        run: |
+          docker build -t backend-app:$GIT_SHA ./backend
+
+      - name: Build frontend image
+        run: |
+          docker build -t frontend-app:$GIT_SHA ./frontend
