@@ -16,8 +16,13 @@ jobs:
       - name: Set Git SHA
         run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-      - name: Show deployment info
-        run: echo "Deploying DEV with image tag $GIT_SHA"
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG_DEV }}" > $HOME/.kube/config
+
+      - name: Verify cluster access
+        run: kubectl get ns
 
       - name: Deploy backend to DEV
         run: |
