@@ -1,0 +1,28 @@
+name: CD - DEV
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set Git SHA
+        run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Show deployment info
+        run: echo "Deploying DEV with image tag $GIT_SHA"
+
+      - name: Deploy backend to DEV
+        run: |
+          kubectl set image deployment/backend backend=backend-app:$GIT_SHA -n app-dev
+
+      - name: Deploy frontend to DEV
+        run: |
+          kubectl set image deployment/frontend frontend=frontend-app:$GIT_SHA -n app-dev
