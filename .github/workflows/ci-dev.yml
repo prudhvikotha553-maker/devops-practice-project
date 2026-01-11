@@ -1,0 +1,25 @@
+name: CI - Dev
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend image
+        run: |
+          docker build -t backend-app:${{ github.sha }} ./backend
+
+      - name: Build frontend image
+        run: |
+          docker build -t frontend-app:${{ github.sha }} ./frontend
