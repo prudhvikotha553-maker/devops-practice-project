@@ -15,28 +15,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Write kubeconfig
-        shell: cmd
+      - name: Restore kubeconfig
+        shell: powershell
         run: |
-          echo %DEV_KUBECONFIG_B64% > kubeconfig.b64
-          certutil -decode kubeconfig.b64 kubeconfig.yaml
-          set KUBECONFIG=%CD%\kubeconfig.yaml
-
-        env:
-          DEV_KUBECONFIG_B64: ${{ secrets.DEV_KUBECONFIG_B64 }}
+          $kubeconfigPath = "$env:GITHUB_WORKSPACE\kubeconfig-dev.yaml"
+          $decoded = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("${{ secrets.DEV_KUBECONFIG_B64 }}"))
+          Set-Content -Path $kubeconfigPath -Value $decoded -Encoding ascii
+          echo "KUBECONFIG=$kubeconfigPath" >> $env:GITHUB_ENV
 
       - name: Verify cluster access
-        shell: cmd
-        run: kubectl get ns
+        shell: powershell
+        run: |
+          kubectl config view --minify
+          kubectl get ns
 
       - name: Deploy backend to DEV
-        shell: cmd
+        shell: powershell
         run: |
           kubectl apply -f k8s/dev/backend-deployment.yaml
           kubectl apply -f k8s/dev/backend-service.yaml
 
       - name: Deploy frontend to DEV
-        shell: cmd
+        shell: powershell
         run: |
           kubectl apply -f k8s/dev/frontend-configmap.yaml
           kubectl apply -f k8s/dev/frontend-deployment.yaml
