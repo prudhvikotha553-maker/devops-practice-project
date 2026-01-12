@@ -1,33 +1,35 @@
-name: CD - DEV
+name: CD - Deploy to DEV
 
 on:
-  push:
-    branches:
-      - develop
+  workflow_run:
+    workflows: ["CI - DEV"]
+    types:
+      - completed
 
 jobs:
   deploy-dev:
-    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: self-hosted
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set Git SHA
-        run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
-      - name: Configure kubeconfig
+      - name: Set kubeconfig
         run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG_DEV }}" > $HOME/.kube/config
+          set KUBECONFIG=%GITHUB_WORKSPACE%\.github\workflows\kubeconfig-dev.yaml
 
       - name: Verify cluster access
         run: kubectl get ns
 
       - name: Deploy backend to DEV
         run: |
-          kubectl set image deployment/backend backend=backend-app:$GIT_SHA -n app-dev
+          kubectl apply -f k8s/dev/backend-deployment.yaml
+          kubectl apply -f k8s/dev/backend-service.yaml
 
       - name: Deploy frontend to DEV
         run: |
-          kubectl set image deployment/frontend frontend=frontend-app:$GIT_SHA -n app-dev
+          kubectl apply -f k8s/dev/frontend-configmap.yaml
+          kubectl apply -f k8s/dev/frontend-deployment.yaml
+          kubectl apply -f k8s/dev/frontend-service.yaml
+          kubectl apply -f k8s/dev/frontend-ingress.yaml
