@@ -13,12 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set kubeconfig
+      - name: Configure kubeconfig
         shell: powershell
         run: |
-          echo "KUBECONFIG=C:\github-runner\kubeconfig-dev.yaml" >> $env:GITHUB_ENV
+          echo "KUBECONFIG=C:\github-runner\kubeconfig-dev-runner.yaml" >> $env:GITHUB_ENV
 
-      - name: Verify cluster access
+      - name: Verify cluster connectivity
         run: kubectl get ns
 
       - name: Set Git SHA
@@ -26,10 +26,10 @@ jobs:
         run: |
           echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $env:GITHUB_ENV
 
-      - name: Deploy Backend (DEV)
+      - name: Deploy Backend to DEV
         run: |
           kubectl set image deployment/backend backend=backend-app:$env:GIT_SHA -n app-dev
 
-      - name: Deploy Frontend (DEV)
+      - name: Deploy Frontend to DEV
         run: |
           kubectl set image deployment/frontend frontend=frontend-app:$env:GIT_SHA -n app-dev
