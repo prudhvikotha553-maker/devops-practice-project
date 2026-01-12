@@ -18,17 +18,13 @@ jobs:
         run: |
           echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $env:GITHUB_ENV
 
-      - name: Show SHA
-        shell: powershell
-        run: |
-          echo "Deploying SHA=$env:GIT_SHA"
+      - name: Verify kubectl access
+        run: kubectl get ns
 
-      - name: Deploy backend to DEV
-        shell: powershell
+      - name: Deploy Backend (DEV)
         run: |
           kubectl set image deployment/backend backend=backend-app:$env:GIT_SHA -n app-dev
 
-      - name: Deploy frontend to DEV
-        shell: powershell
+      - name: Deploy Frontend (DEV)
         run: |
           kubectl set image deployment/frontend frontend=frontend-app:$env:GIT_SHA -n app-dev
