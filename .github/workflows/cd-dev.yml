@@ -15,19 +15,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set kubeconfig
+      - name: Write kubeconfig
+        shell: cmd
         run: |
-          set KUBECONFIG=%GITHUB_WORKSPACE%\.github\workflows\kubeconfig-dev.yaml
+          echo %DEV_KUBECONFIG_B64% > kubeconfig.b64
+          certutil -decode kubeconfig.b64 kubeconfig.yaml
+          set KUBECONFIG=%CD%\kubeconfig.yaml
+
+        env:
+          DEV_KUBECONFIG_B64: ${{ secrets.DEV_KUBECONFIG_B64 }}
 
       - name: Verify cluster access
+        shell: cmd
         run: kubectl get ns
 
       - name: Deploy backend to DEV
+        shell: cmd
         run: |
           kubectl apply -f k8s/dev/backend-deployment.yaml
           kubectl apply -f k8s/dev/backend-service.yaml
 
       - name: Deploy frontend to DEV
+        shell: cmd
         run: |
           kubectl apply -f k8s/dev/frontend-configmap.yaml
           kubectl apply -f k8s/dev/frontend-deployment.yaml
