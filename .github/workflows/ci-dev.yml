@@ -6,23 +6,12 @@ on:
       - develop
 
 jobs:
-  build-dev:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set Git SHA
-        run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
-      - name: Show Git SHA
-        run: echo "Building images with SHA=$GIT_SHA"
-
-      - name: Build Backend Image
-        run: |
-          docker build -t backend-app:$GIT_SHA ./backend
-
-      - name: Build Frontend Image
-        run: |
-          docker build -t frontend-app:$GIT_SHA ./frontend
+      - name: Print commit SHA
+        run: echo "CI running for commit $GITHUB_SHA"

@@ -1,4 +1,3 @@
-
 name: CD - Deploy to DEV
 
 on:
@@ -19,25 +18,24 @@ jobs:
 
       - name: Configure kubeconfig
         shell: cmd
+        env:
+          DEV_KUBECONFIG_B64: ${{ secrets.DEV_KUBECONFIG_B64 }}
         run: |
           echo %DEV_KUBECONFIG_B64% > kubeconfig.b64
           certutil -decode kubeconfig.b64 kubeconfig.yaml
           set KUBECONFIG=%CD%\kubeconfig.yaml
 
-        env:
-          DEV_KUBECONFIG_B64: ${{ secrets.DEV_KUBECONFIG_B64 }}
-
       - name: Verify cluster access
         shell: cmd
         run: kubectl get ns
 
-      - name: Deploy backend to DEV
+      - name: Deploy backend
         shell: cmd
         run: |
           kubectl apply -f k8s/dev/backend-deployment.yaml
           kubectl apply -f k8s/dev/backend-service.yaml
 
-      - name: Deploy frontend to DEV
+      - name: Deploy frontend
         shell: cmd
         run: |
           kubectl apply -f k8s/dev/frontend-configmap.yaml
