@@ -3,7 +3,7 @@ name: CI - QA
 on:
   push:
     branches:
-      - qa
+      - develop
 
 jobs:
   build:
@@ -12,5 +12,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: CI marker
+      - name: CI marker for QA
         run: echo "CI - QA completed successfully"

@@ -1,0 +1,46 @@
+name: CD - Deploy to QA
+
+on:
+  workflow_run:
+    workflows:
+      - CI - QA
+    types:
+      - completed
+
+jobs:
+  deploy-qa:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create kubeconfig
+        shell: cmd
+        env:
+          QA_KUBECONFIG_B64: ${{ secrets.QA_KUBECONFIG_B64 }}
+        run: |
+          echo %QA_KUBECONFIG_B64% > kubeconfig.b64
+          certutil -decode kubeconfig.b64 kubeconfig.yaml
+
+      - name: Export kubeconfig
+        shell: cmd
+        run: echo KUBECONFIG=%CD%\kubeconfig.yaml >> %GITHUB_ENV%
+
+      - name: Verify cluster access
+        shell: cmd
+        run: kubectl get ns
+
+      - name: Deploy backend to QA
+        shell: cmd
+        run: |
+          kubectl apply -f k8s/qa/backend-deployment.yaml
+          kubectl apply -f k8s/qa/backend-service.yaml
+
+      - name: Deploy frontend to QA
+        shell: cmd
+        run: |
+          kubectl apply -f k8s/qa/frontend-configmap.yaml
+          kubectl apply -f k8s/qa/frontend-deployment.yaml
+          kubectl apply -f k8s/qa/frontend-service.yaml
+          kubectl apply -f k8s/qa/frontend-ingress.yaml
