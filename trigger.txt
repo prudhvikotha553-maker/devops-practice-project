@@ -2,3 +2,4 @@
 # trigger 
 final-trigger 
 trigger 
+force-cd 
