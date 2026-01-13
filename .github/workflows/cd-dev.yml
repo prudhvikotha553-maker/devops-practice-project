@@ -2,7 +2,8 @@ name: CD - Deploy to DEV
 
 on:
   workflow_run:
-    workflows: ["CI - DEV"]
+    workflows:
+      - CI - DEV
     types:
       - completed
 
@@ -12,10 +13,10 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout source code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Write kubeconfig from secret
+      - name: Configure kubeconfig
         shell: cmd
         run: |
           echo %DEV_KUBECONFIG_B64% > kubeconfig.b64
@@ -29,13 +30,13 @@ jobs:
         shell: cmd
         run: kubectl get ns
 
-      - name: Deploy Backend to DEV
+      - name: Deploy backend to DEV
         shell: cmd
         run: |
           kubectl apply -f k8s/dev/backend-deployment.yaml
           kubectl apply -f k8s/dev/backend-service.yaml
 
-      - name: Deploy Frontend to DEV
+      - name: Deploy frontend to DEV
         shell: cmd
         run: |
           kubectl apply -f k8s/dev/frontend-configmap.yaml
