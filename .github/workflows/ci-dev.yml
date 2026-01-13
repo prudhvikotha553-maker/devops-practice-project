@@ -13,5 +13,5 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Print commit SHA
-        run: echo "CI running for commit $GITHUB_SHA"
+      - name: CI marker
+        run: echo "CI - DEV completed successfully"

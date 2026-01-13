@@ -1,9 +1,11 @@
 name: CD - Deploy to DEV
 
 on:
-  push:
-    branches:
-      - develop
+  workflow_run:
+    workflows:
+      - CI - DEV
+    types:
+      - completed
 
 jobs:
   deploy-dev:
