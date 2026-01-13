@@ -1,20 +1,16 @@
 name: CD - Deploy to DEV
 
 on:
-  workflow_run:
-    workflows:
-      - CI - DEV
-    types:
-      - completed
+  push:
+    branches:
+      - develop
 
 jobs:
   deploy-dev:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: self-hosted
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Configure kubeconfig
         shell: cmd
