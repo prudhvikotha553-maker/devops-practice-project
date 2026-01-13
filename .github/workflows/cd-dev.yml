@@ -2,8 +2,7 @@ name: CD - Deploy to DEV
 
 on:
   workflow_run:
-    workflows:
-      - CI - DEV
+    workflows: ["CI - DEV"]
     types:
       - completed
 
@@ -15,30 +14,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create kubeconfig
-        shell: cmd
+      - name: Create kubeconfig (PowerShell – SAFE)
+        shell: powershell
         env:
           DEV_KUBECONFIG_B64: ${{ secrets.DEV_KUBECONFIG_B64 }}
         run: |
-          echo %DEV_KUBECONFIG_B64% > kubeconfig.b64
+          $content = $env:DEV_KUBECONFIG_B64
+          [System.IO.File]::WriteAllText("kubeconfig.b64", $content)
           certutil -decode kubeconfig.b64 kubeconfig.yaml
 
       - name: Export kubeconfig
-        shell: cmd
-        run: echo KUBECONFIG=%CD%\kubeconfig.yaml >> %GITHUB_ENV%
+        shell: powershell
+        run: |
+          "KUBECONFIG=$PWD\kubeconfig.yaml" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Verify cluster
-        shell: cmd
+      - name: Verify cluster access
+        shell: powershell
         run: kubectl get ns
 
       - name: Deploy backend
-        shell: cmd
+        shell: powershell
         run: |
           kubectl apply -f k8s/dev/backend-deployment.yaml
           kubectl apply -f k8s/dev/backend-service.yaml
 
       - name: Deploy frontend
-        shell: cmd
+        shell: powershell
         run: |
           kubectl apply -f k8s/dev/frontend-configmap.yaml
           kubectl apply -f k8s/dev/frontend-deployment.yaml
