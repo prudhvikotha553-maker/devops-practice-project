@@ -2,8 +2,7 @@ name: CD - Deploy to QA
 
 on:
   workflow_run:
-    workflows:
-      - CI - QA
+    workflows: ["CI - QA"]
     types:
       - completed
 
@@ -27,17 +26,17 @@ jobs:
         shell: cmd
         run: echo KUBECONFIG=%CD%\kubeconfig.yaml >> %GITHUB_ENV%
 
-      - name: Verify cluster access
+      - name: Verify cluster
         shell: cmd
         run: kubectl get ns
 
-      - name: Deploy backend to QA
+      - name: Deploy backend
         shell: cmd
         run: |
           kubectl apply -f k8s/qa/backend-deployment.yaml
           kubectl apply -f k8s/qa/backend-service.yaml
 
-      - name: Deploy frontend to QA
+      - name: Deploy frontend
         shell: cmd
         run: |
           kubectl apply -f k8s/qa/frontend-configmap.yaml
