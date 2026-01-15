@@ -1,4 +1,4 @@
-name: CI-CD Pipeline
+name: Branch-based CI/CD Pipeline
 
 on:
   push:
@@ -15,8 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: CI check
-        run: echo "CI stage completed"
-
+        run: echo "CI completed successfully"
 
   deploy-dev:
     name: Deploy to DEV
@@ -30,21 +29,15 @@ jobs:
       - name: Create kubeconfig (DEV)
         shell: powershell
         run: |
-          $path = "$PWD\kubeconfig-dev.yaml"
-          "${{ secrets.KUBECONFIG_DEV }}" | Out-File -FilePath $path -Encoding ascii
-
-      - name: Verify cluster (DEV)
-        shell: powershell
-        run: |
-          $env:KUBECONFIG = "$PWD\kubeconfig-dev.yaml"
+          "${{ secrets.KUBECONFIG_DEV }}" | Out-File kubeconfig.yaml -Encoding ascii
+          $env:KUBECONFIG = "$PWD\kubeconfig.yaml"
           kubectl cluster-info
 
       - name: Deploy DEV
         shell: powershell
         run: |
-          $env:KUBECONFIG = "$PWD\kubeconfig-dev.yaml"
+          $env:KUBECONFIG = "$PWD\kubeconfig.yaml"
           kubectl apply -f dev/ --validate=false
-
 
   deploy-qa:
     name: Deploy to QA
@@ -58,21 +51,15 @@ jobs:
       - name: Create kubeconfig (QA)
         shell: powershell
         run: |
-          $path = "$PWD\kubeconfig-qa.yaml"
-          "${{ secrets.KUBECONFIG_QA }}" | Out-File -FilePath $path -Encoding ascii
-
-      - name: Verify cluster (QA)
-        shell: powershell
-        run: |
-          $env:KUBECONFIG = "$PWD\kubeconfig-qa.yaml"
+          "${{ secrets.KUBECONFIG_QA }}" | Out-File kubeconfig.yaml -Encoding ascii
+          $env:KUBECONFIG = "$PWD\kubeconfig.yaml"
           kubectl cluster-info
 
       - name: Deploy QA
         shell: powershell
         run: |
-          $env:KUBECONFIG = "$PWD\kubeconfig-qa.yaml"
+          $env:KUBECONFIG = "$PWD\kubeconfig.yaml"
           kubectl apply -f qa/ --validate=false
-
 
   deploy-uat:
     name: Deploy to UAT
@@ -86,21 +73,15 @@ jobs:
       - name: Create kubeconfig (UAT)
         shell: powershell
         run: |
-          $path = "$PWD\kubeconfig-uat.yaml"
-          "${{ secrets.KUBECONFIG_UAT }}" | Out-File -FilePath $path -Encoding ascii
-
-      - name: Verify cluster (UAT)
-        shell: powershell
-        run: |
-          $env:KUBECONFIG = "$PWD\kubeconfig-uat.yaml"
+          "${{ secrets.KUBECONFIG_UAT }}" | Out-File kubeconfig.yaml -Encoding ascii
+          $env:KUBECONFIG = "$PWD\kubeconfig.yaml"
           kubectl cluster-info
 
       - name: Deploy UAT
         shell: powershell
         run: |
-          $env:KUBECONFIG = "$PWD\kubeconfig-uat.yaml"
+          $env:KUBECONFIG = "$PWD\kubeconfig.yaml"
           kubectl apply -f uat/ --validate=false
-
 
   deploy-prod:
     name: Deploy to PROD
@@ -114,17 +95,12 @@ jobs:
       - name: Create kubeconfig (PROD)
         shell: powershell
         run: |
-          $path = "$PWD\kubeconfig-prod.yaml"
-          "${{ secrets.KUBECONFIG_PROD }}" | Out-File -FilePath $path -Encoding ascii
-
-      - name: Verify cluster (PROD)
-        shell: powershell
-        run: |
-          $env:KUBECONFIG = "$PWD\kubeconfig-prod.yaml"
+          "${{ secrets.KUBECONFIG_PROD }}" | Out-File kubeconfig.yaml -Encoding ascii
+          $env:KUBECONFIG = "$PWD\kubeconfig.yaml"
           kubectl cluster-info
 
       - name: Deploy PROD
         shell: powershell
         run: |
-          $env:KUBECONFIG = "$PWD\kubeconfig-prod.yaml"
+          $env:KUBECONFIG = "$PWD\kubeconfig.yaml"
           kubectl apply -f prod/ --validate=false
