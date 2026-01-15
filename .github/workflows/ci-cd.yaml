@@ -25,16 +25,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure kubeconfig
+      - name: Create kubeconfig file
         shell: powershell
         run: |
           $kubeconfigPath = "$PWD\kubeconfig-dev.yaml"
           "${{ secrets.KUBECONFIG_DEV }}" | Out-File -FilePath $kubeconfigPath -Encoding ascii
-          $env:KUBECONFIG = $kubeconfigPath
+
+      - name: Verify cluster access
+        shell: powershell
+        run: |
+          $env:KUBECONFIG = "$PWD\kubeconfig-dev.yaml"
           kubectl config get-contexts
           kubectl cluster-info
 
       - name: Deploy to DEV namespace
         shell: powershell
         run: |
+          $env:KUBECONFIG = "$PWD\kubeconfig-dev.yaml"
           kubectl apply -f dev/ --validate=false
