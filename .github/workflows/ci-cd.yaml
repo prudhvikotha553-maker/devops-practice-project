@@ -7,31 +7,34 @@ on:
 
 jobs:
   ci:
+    name: CI Stage
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: CI check
-        run: echo "CI stage completed"
+        run: echo "CI stage completed successfully"
 
   deploy-dev:
     name: Deploy to DEV
-    runs-on: [self-hosted, Windows, X64, dev]
     needs: ci
     environment: dev
+    runs-on: [self-hosted, Windows, X64, dev]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Configure kubeconfig
+        shell: powershell
         run: |
-          echo "${{ secrets.KUBECONFIG_DEV }}" > kubeconfig
-          export KUBECONFIG=$PWD/kubeconfig
+          "${{ secrets.KUBECONFIG_DEV }}" | Out-File -FilePath kubeconfig -Encoding ascii
+          $env:KUBECONFIG = "$PWD\kubeconfig"
           kubectl version --client
 
       - name: Deploy to DEV namespace
+        shell: powershell
         run: |
-          export KUBECONFIG=$PWD/kubeconfig
           kubectl apply -f dev/
