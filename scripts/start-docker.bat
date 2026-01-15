@@ -1,0 +1,3 @@
+@echo off
+echo 🐳 Starting application with Docker Compose...
+docker-compose up --build

@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: app-qa
+data:
+  REACT_APP_API_URL: "http://backend-service.app-qa.svc.cluster.local:5000"
+  ENVIRONMENT: "qa"
