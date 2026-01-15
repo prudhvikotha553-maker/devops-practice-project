@@ -4,24 +4,26 @@ on:
   push:
     branches:
       - develop
+      - qa
+      - uat
+      - main
 
 jobs:
   ci:
+    name: CI Stage
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: CI check
         run: echo "CI stage completed"
 
 
   deploy-dev:
     name: Deploy to DEV
+    if: github.ref == 'refs/heads/develop'
     runs-on: [self-hosted, Windows, X64, dev]
     needs: ci
     environment: dev
-
     steps:
       - uses: actions/checkout@v4
 
@@ -46,10 +48,10 @@ jobs:
 
   deploy-qa:
     name: Deploy to QA
+    if: github.ref == 'refs/heads/qa'
     runs-on: [self-hosted, Windows, X64, qa]
-    needs: deploy-dev
+    needs: ci
     environment: qa
-
     steps:
       - uses: actions/checkout@v4
 
@@ -74,10 +76,10 @@ jobs:
 
   deploy-uat:
     name: Deploy to UAT
+    if: github.ref == 'refs/heads/uat'
     runs-on: [self-hosted, Windows, X64, uat]
-    needs: deploy-qa
+    needs: ci
     environment: uat
-
     steps:
       - uses: actions/checkout@v4
 
@@ -102,10 +104,10 @@ jobs:
 
   deploy-prod:
     name: Deploy to PROD
+    if: github.ref == 'refs/heads/main'
     runs-on: [self-hosted, Windows, X64, prod]
-    needs: deploy-uat
+    needs: ci
     environment: prod
-
     steps:
       - uses: actions/checkout@v4
 
