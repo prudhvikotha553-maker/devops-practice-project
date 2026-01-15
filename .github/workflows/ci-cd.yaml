@@ -17,7 +17,7 @@ jobs:
 
   deploy-dev:
     name: Deploy to DEV
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Windows, X64, dev]
     needs: ci
     environment: dev
 
