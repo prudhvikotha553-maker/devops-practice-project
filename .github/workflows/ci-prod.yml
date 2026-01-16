@@ -1,4 +1,4 @@
-name: CI - PROD
+name: CI-CD PROD
 
 on:
   push:
@@ -6,23 +6,18 @@ on:
       - main
 
 jobs:
-  ci-prod:
-    runs-on: ubuntu-latest
+  deploy-prod:
+    runs-on: [self-hosted, Windows, X64, prod]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set Git SHA
-        run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
-      - name: Show SHA
-        run: echo "Building PROD images for SHA=$GIT_SHA"
-
-      - name: Build backend image
+      - name: Load kubeconfig
+        shell: powershell
         run: |
-          docker build -t backend-app:$GIT_SHA ./backend
+          "${{ secrets.KUBECONFIG_PROD }}" | Out-File kubeconfig.yaml -Encoding ascii
+          $env:KUBECONFIG="$PWD\kubeconfig.yaml"
 
-      - name: Build frontend image
-        run: |
-          docker build -t frontend-app:$GIT_SHA ./frontend
+      - name: Deploy PROD
+        shell: powershell
+        run: kubectl apply -f prod/ --validate=false

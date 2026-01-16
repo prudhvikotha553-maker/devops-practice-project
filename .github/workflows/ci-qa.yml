@@ -1,0 +1,23 @@
+name: CI-CD QA
+
+on:
+  push:
+    branches:
+      - qa
+
+jobs:
+  deploy-qa:
+    runs-on: [self-hosted, Windows, X64, qa]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Load kubeconfig
+        shell: powershell
+        run: |
+          "${{ secrets.KUBECONFIG_QA }}" | Out-File kubeconfig.yaml -Encoding ascii
+          $env:KUBECONFIG="$PWD\kubeconfig.yaml"
+
+      - name: Deploy QA
+        shell: powershell
+        run: kubectl apply -f qa/ --validate=false

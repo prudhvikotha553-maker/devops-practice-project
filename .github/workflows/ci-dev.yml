@@ -1,4 +1,4 @@
-name: CI - Dev
+name: CI-CD DEV
 
 on:
   push:
@@ -6,20 +6,18 @@ on:
       - develop
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  deploy-dev:
+    runs-on: [self-hosted, Windows, X64, dev]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Docker
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build backend image
+      - name: Load kubeconfig
+        shell: powershell
         run: |
-          docker build -t backend-app:${{ github.sha }} ./backend
+          "${{ secrets.KUBECONFIG_DEV }}" | Out-File kubeconfig.yaml -Encoding ascii
+          $env:KUBECONFIG="$PWD\kubeconfig.yaml"
 
-      - name: Build frontend image
-        run: |
-          docker build -t frontend-app:${{ github.sha }} ./frontend
+      - name: Deploy DEV
+        shell: powershell
+        run: kubectl apply -f dev/ --validate=false

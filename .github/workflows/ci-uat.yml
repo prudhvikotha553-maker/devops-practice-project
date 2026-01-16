@@ -1,0 +1,23 @@
+name: CI-CD UAT
+
+on:
+  push:
+    branches:
+      - uat
+
+jobs:
+  deploy-uat:
+    runs-on: [self-hosted, Windows, X64, uat]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Load kubeconfig
+        shell: powershell
+        run: |
+          "${{ secrets.KUBECONFIG_UAT }}" | Out-File kubeconfig.yaml -Encoding ascii
+          $env:KUBECONFIG="$PWD\kubeconfig.yaml"
+
+      - name: Deploy UAT
+        shell: powershell
+        run: kubectl apply -f uat/ --validate=false
